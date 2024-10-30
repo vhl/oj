@@ -76,9 +76,9 @@ static void	dump_sym_obj(VALUE obj, Out out);
 static void	dump_class_comp(VALUE obj, Out out);
 static void	dump_class_obj(VALUE obj, Out out);
 static void	dump_array(VALUE obj, VALUE clas, int depth, Out out);
-static int	hash_cb_strict(VALUE key, VALUE value, Out out);
-static int	hash_cb_compat(VALUE key, VALUE value, Out out);
-static int	hash_cb_object(VALUE key, VALUE value, Out out);
+static int	hash_cb_strict(VALUE key, VALUE value, VALUE ov);
+static int	hash_cb_compat(VALUE key, VALUE value, VALUE ov);
+static int	hash_cb_object(VALUE key, VALUE value, VALUE ov);
 static void	dump_hash(VALUE obj, VALUE clas, int depth, int mode, Out out);
 static void	dump_time(VALUE obj, Out out, int withZone);
 static void	dump_ruby_time(VALUE obj, Out out);
@@ -92,7 +92,7 @@ static void	dump_obj_obj(VALUE obj, int depth, Out out);
 static void	dump_struct_comp(VALUE obj, int depth, Out out, int argc, VALUE *argv, bool as_ok);
 static void	dump_struct_obj(VALUE obj, int depth, Out out);
 #if HAS_IVAR_HELPERS
-static int	dump_attr_cb(ID key, VALUE value, Out out);
+static int	dump_attr_cb(ID key, VALUE value, VALUE ov);
 #endif
 static void	dump_obj_attrs(VALUE obj, VALUE clas, slot_t id, int depth, Out out);
 static void	dump_odd(VALUE obj, Odd odd, VALUE clas, int depth, Out out);
@@ -827,7 +827,8 @@ dump_array(VALUE a, VALUE clas, int depth, Out out) {
 }
 
 static int
-hash_cb_strict(VALUE key, VALUE value, Out out) {
+hash_cb_strict(VALUE key, VALUE value, VALUE ov) {
+    Out         out = (Out) ov;
     int		depth = out->depth;
     long	size;
     int		rtype = rb_type(key);
@@ -893,7 +894,8 @@ hash_cb_strict(VALUE key, VALUE value, Out out) {
 }
 
 static int
-hash_cb_compat(VALUE key, VALUE value, Out out) {
+hash_cb_compat(VALUE key, VALUE value, VALUE ov) {
+    Out         out = (Out) ov;
     int		depth = out->depth;
     long	size;
 
@@ -960,7 +962,8 @@ hash_cb_compat(VALUE key, VALUE value, Out out) {
 }
 
 static int
-hash_cb_object(VALUE key, VALUE value, Out out) {
+hash_cb_object(VALUE key, VALUE value, VALUE ov) {
+    Out         out = (Out) ov;
     int		depth = out->depth;
     long	size = depth * out->indent + 1;
 
@@ -1594,7 +1597,8 @@ isRbxHashAttr(const char *attr) {
 
 #if HAS_IVAR_HELPERS
 static int
-dump_attr_cb(ID key, VALUE value, Out out) {
+dump_attr_cb(ID key, VALUE value, VALUE ov) {
+    Out         out = (Out) ov;
     int		depth = out->depth;
     size_t	size = depth * out->indent + 1;
     const char	*attr = rb_id2name(key);
